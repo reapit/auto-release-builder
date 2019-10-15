@@ -11,7 +11,6 @@ set -o pipefail
 # Function to create a new release in Github API
 # ============================================
 request_create_release(){
-
 	local json_body='{
 	  "tag_name": "@tag_name@",
 	  "target_commitish": "@branch@",
@@ -32,6 +31,46 @@ request_create_release(){
 	  --header "Authorization: Bearer $GITHUB_TOKEN" \
 	  --header 'Content-Type: application/json' \
 	  --data "$json_body"
+}
+
+request_create_ticket(){
+	local json_body='{
+	"fields":
+		{
+			"key": "SI"
+		},
+	"summary": "ARB: Deploy @release_name@ to @environment@",
+	"description": "https://github.com/reapit/rpw/releases/tag/@tag@
+	
+Please deploy to:
+	/mnt/netapp/code/webservice/release-groups/@environment@/
+	/mnt/netapp/code/web/release-groups/@environment@/
+	/mnt/netapp/code/tracker/release-groups/@environment@/
+	/mnt/netapp/code/rda/release-groups/@environment@/
+	/mnt/netapp/code/services/release-groups/@environment@/
+	/mnt/netapp/code/propertypulse/release-groups/@environment@"
+	"issuetype":
+		{
+			"name": "Deployment"
+		}
+	}'
+	
+	if [[ $prerelease ]]; then
+		local environment='test'
+	else 
+		local environment='live'
+	fi
+	
+	json_body=$(echo "$json_body" | sed "s/@tag@/$git_tag/")
+	json_body=$(echo "$json_body" | sed "s/@release_name@/$release_name/")
+	json_body=$(echo "$json_body" | sed "s/@environment@/$environment/")
+	
+	curl --request POST \
+		--url 'https://reapit.atlassian.net/rest/api/3/issue' \
+		--user "${JIRA_USER}:${JIRA_API_KEY}" \
+		--header 'Accept: application/json' \
+		--header 'Content-Type: application/json' \
+		--data "$json_body"
 }
 
 increment_version ()
@@ -99,6 +138,7 @@ if [[ ${GITHUB_REF} = "refs/heads/master" || ${GITHUB_REF} = "refs/heads/develop
 	git_tag="${new_tag}"
 	release_name="${new_tag//RC/ Release Candidate }"
 	request_create_release
+	request_create_ticket
 else
 	echo "This Action run only in master or development branch"
 	exit 0
