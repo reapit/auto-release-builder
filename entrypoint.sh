@@ -67,7 +67,7 @@ Please deploy to:
 	
 	curl --request POST \
 		--url 'https://reapit.atlassian.net/rest/api/3/issue' \
-		--user '<your-email-address>:<api-token>' \
+		--user "${JIRA_USER}:${JIRA_API_KEY}" \
 		--header 'Accept: application/json' \
 		--header 'Content-Type: application/json' \
 		--data "$json_body"
