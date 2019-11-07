@@ -40,7 +40,7 @@ request_create_ticket(){
 				"key":"SI"
 			},
 			"summary": "ARB: Deploy @release_name@ to @environment@",
-			"description": "https://github.com/reapit/rpw/releases/tag/@tag@\nPlease deploy to:\n/mnt/netapp/code/webservice/release-groups/@environment@/\n/mnt/netapp/code/web/release-groups/@environment@/\n/mnt/netapp/code/tracker/release-groups/@environment@/\n/mnt/netapp/code/rda/release-groups/@environment@/\n/mnt/netapp/code/services/release-groups/@environment@/\\n/mnt/netapp/code/propertypulse/release-groups/@environment@",
+			"description": "https://github.com/reapit/rpw/releases/tag/@tag@\nPlease deploy to:\n/mnt/netapp/code/webservice/release-groups/@environment@/\n/mnt/netapp/code/web/release-groups/@environment@/\n/mnt/netapp/code/tracker/release-groups/@environment@/\n/mnt/netapp/code/rda/release-groups/@environment@/\n/mnt/netapp/code/services/release-groups/@environment@/\n/mnt/netapp/code/propertypulse/release-groups/@environment@",
 			"issuetype":
 				{
 					"id": "12500"
@@ -56,7 +56,7 @@ request_create_ticket(){
 	
 	json_body=$(echo "$json_body" | sed "s/@tag@/$git_tag/")
 	json_body=$(echo "$json_body" | sed "s/@release_name@/$release_name/")
-	json_body=$(echo "$json_body" | sed "s/@environment@/$environment/")
+	json_body=$(echo "$json_body" | sed "s/@environment@/$environment/g")
 	
 	curl --request POST \
 		--url 'https://reapit.atlassian.net/rest/api/2/issue' \
