@@ -35,17 +35,17 @@ request_create_release(){
 
 request_create_ticket(){
 	local json_body='{
-	"fields": {
-		"project": {
-			"key":"SI"
-		}
-	},
-	"summary": "ARB: Deploy @release_name@ to @environment@",
-	"description": "https://github.com/reapit/rpw/releases/tag/@tag@\nPlease deploy to:\n/mnt/netapp/code/webservice/release-groups/@environment@/\n/mnt/netapp/code/web/release-groups/@environment@/\n/mnt/netapp/code/tracker/release-groups/@environment@/\n/mnt/netapp/code/rda/release-groups/@environment@/\n/mnt/netapp/code/services/release-groups/@environment@/\\n/mnt/netapp/code/propertypulse/release-groups/@environment@",
-	"issuetype":
-		{
-			"id": "12500"
-		}
+		"fields": {
+			"project": {
+				"key":"SI"
+			},
+			"summary": "ARB: Deploy @release_name@ to @environment@",
+			"description": "https://github.com/reapit/rpw/releases/tag/@tag@\nPlease deploy to:\n/mnt/netapp/code/webservice/release-groups/@environment@/\n/mnt/netapp/code/web/release-groups/@environment@/\n/mnt/netapp/code/tracker/release-groups/@environment@/\n/mnt/netapp/code/rda/release-groups/@environment@/\n/mnt/netapp/code/services/release-groups/@environment@/\\n/mnt/netapp/code/propertypulse/release-groups/@environment@",
+			"issuetype":
+				{
+					"id": "12500"
+				}
+		}	
 	}'
 	
 	if [[ $prerelease ]]; then
