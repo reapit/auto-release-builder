@@ -21,7 +21,7 @@ request_create_release(){
 	}'
 		
 	json_body=$(echo "$json_body" | sed "s/@tag_name@/$git_tag/")
-	json_body=$(echo "$json_body" | sed "s/@branch@/master/")
+	json_body=$(echo "$json_body" | sed "s/@branch@/$branch/")
 	json_body=$(echo "$json_body" | sed "s/@release_name@/$release_name/")
 	json_body=$(echo "$json_body" | sed "s/@description@/$DESCRIPTION/")
 	json_body=$(echo "$json_body" | sed "s/@prerelease@/$prerelease/")
@@ -90,6 +90,7 @@ if [[ -z "$GITHUB_TOKEN" ]]; then
   exit 1
 fi
 if [[ ${GITHUB_REF} = "refs/heads/master" || ${GITHUB_REF} = "refs/heads/development" ]]; then
+	branch=$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')
 	last_tag_number=$(git describe --tags $(git rev-list --tags --max-count=1))
 	echo "The last tag number was: $last_tag_number"
 	if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
