@@ -40,7 +40,7 @@ request_create_ticket(){
 			"key": "SI"
 		},
 	"summary": "ARB: Deploy @release_name@ to @environment@",
-	"description": "https://github.com/reapit/rpw/releases/tag/@tag@\nPlease deploy to:\n/mnt/netapp/code/webservice/release-groups/@environment@/\n/mnt/netapp/code/web/release-groups/@environment@/\n/mnt/netapp/code/tracker/release-groups/@environment@/\n/mnt/netapp/code/rda/release-groups/@environment@/\n/mnt/netapp/code/services/release-groups/@environment@/\\n/mnt/netapp/code/propertypulse/release-groups/@environment@"
+	"description": "https://github.com/reapit/rpw/releases/tag/@tag@\nPlease deploy to:\n/mnt/netapp/code/webservice/release-groups/@environment@/\n/mnt/netapp/code/web/release-groups/@environment@/\n/mnt/netapp/code/tracker/release-groups/@environment@/\n/mnt/netapp/code/rda/release-groups/@environment@/\n/mnt/netapp/code/services/release-groups/@environment@/\\n/mnt/netapp/code/propertypulse/release-groups/@environment@",
 	"issuetype":
 		{
 			"name": "Deployment"
