@@ -59,7 +59,7 @@ request_create_ticket(){
 	json_body=$(echo "$json_body" | sed "s/@environment@/$environment/")
 	
 	curl --request POST \
-		--url 'https://reapit.atlassian.net/rest/api/3/issue' \
+		--url 'https://reapit.atlassian.net/rest/api/2/issue' \
 		--user "${JIRA_USER}:${JIRA_API_KEY}" \
 		--header 'Accept: application/json' \
 		--header 'Content-Type: application/json' \
