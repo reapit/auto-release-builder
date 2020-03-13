@@ -66,20 +66,30 @@ request_create_ticket(){
 		--data "$json_body"
 }
 
+get_rc()
+{
+  declare -a verArr=( ${1//[\.,RC]/ } )
+    echo ${verArr[3]}
+}
+
+get_version_from_tag()
+{
+  declare -a verArr=( ${1//[\.,RC]/ } )
+	echo ${verArr[0]}.${verArr[1]}.${verArr[2]}
+}
+
 increment_version ()
 {
   declare -a part=( ${1//\./ } )
-  declare    new
+  declare -i   new
   declare -i carry=1
 
-  for (( CNTR=${#part[@]}-2; CNTR>=0; CNTR-=1 )); do
-    len=${#part[CNTR]}
-    new=$((part[CNTR]+carry))
-    [ ${#new} -gt $len ] && carry=1 || carry=0
-    [ $CNTR -gt 0 ] && part[CNTR]=${new: -len} || part[CNTR]=${new}
-  done
-  new="${part[*]}"
-  echo -e "${new// /.}"
+	new=${part[1]}+1
+	part[1]=$new
+	part[2]=0
+
+  new_version=${part[*]}
+  echo "${new_version// /.}"
 } 
 
 # ==================== MAIN ====================
@@ -89,51 +99,49 @@ if [[ -z "$GITHUB_TOKEN" ]]; then
   echo "Set the GITHUB_TOKEN env variable."
   exit 1
 fi
-if [[ ${GITHUB_REF} = "refs/heads/master" || ${GITHUB_REF} = "refs/heads/development" ]]; then
+if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 	branch=$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')
-	last_tag_number=$(git describe --tags $(git rev-list --tags --max-count=1))
+	last_tag_number=$(git tag -l 4.* --sort -version:refname | head -1)
 	echo "The last tag number was: $last_tag_number"
 	if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 		prerelease=true
 	
 		# Create new tag.
 		if [[ $last_tag_number == *"RC"* ]]; then
-			current_rc_version="${last_tag_number: -1}"
-			next_rc_version=$((current_rc_version+1))
-			new_tag="${last_tag_number::-1}$next_rc_version"
+			echo "Checking for a main release"
+			current_version="$(get_version_from_tag $last_tag_number)"
+			checkForMain=$(git tag -l ${current_version})
+
+			if [[ -z $checkForMain ]]; then
+				echo "The last tag was NOT a main release"
+				current_rc_version=$(get_rc $last_tag_number)
+				declare -i next_rc_version=$current_rc_version+1
+				echo "Incrementing RC version to" $next_rc_version
+				new_tag="${current_version}RC${next_rc_version}"
+				incrementVersionNumber=false
+			else
+				echo "The last tag WAS a main release"
+				incrementVersionNumber=true
+			fi
 		else
-			new_version=$(increment_version $last_tag_number)
-			new_tag="${new_version}RC1"
-		fi	
-	else
-		prerelease=false
-		echo "LOG: Merging into Master branch"
-		if [[ $last_tag_number == *"RC"* ]]; then
-			modified_tag="${last_tag_number%RC*}"
-			new_tag=$modified_tag
-			echo "The last tag was an RC version"
-			echo "The new tag and release is: $new_tag"
-		else
-			new_tag=$(increment_version $last_tag_number)
-			echo "The last tag was not an RC version"
-			echo "The new tag and release is: $new_tag"
+			echo "Increment version number"
+			incrementVersionNumber=true
 		fi
-		
-		last_commit=$(git log -1 --pretty=%B)
-		echo "The last commit was: $last_commit"
-		if [[ -n "$last_commit" && "$last_commit" == *"hotfix-"* ]]; then
-			#Hotfixes will remain a manual process as they are a rare occurance
-			#It would also make this automation very combersome.
-			echo "LOG: Release cancelled as change is a hot fix and should be done manually"
-			exit 0
+
+		if [[ $incrementVersionNumber == true ]]; then
+			new_version=$(increment_version $last_tag_number)
+			echo "Incrementing version number to ${new_version}"
+			new_tag="${new_version}RC1"
 		fi
 	fi
 
+	echo "The new git tag number is: $new_tag"
 	git_tag="${new_tag}"
-	release_name="${new_tag//RC/ Release Candidate }"
+	release_name="${git_tag//RC/ Release Candidate }"
+	echo "New Release Name: ${release_name}"
 	request_create_release
 	request_create_ticket
 else
-	echo "This Action run only in master or development branch"
+	echo "This Action runs only for the development branch"
 	exit 0
 fi
